@@ -1,15 +1,15 @@
 package com.hubspot.baragon.service.managed;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.BaragonDataModule;
 import com.hubspot.baragon.data.BaragonAuthDatastore;
 import com.hubspot.baragon.migrations.ZkDataMigrationRunner;
 import com.hubspot.baragon.models.BaragonAuthKey;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
 import com.hubspot.baragon.service.listeners.AbstractLatchListener;
-import io.dropwizard.lifecycle.Managed;
+import com.hubspot.baragon.service.platform.Managed;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -19,6 +19,7 @@ import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class BaragonManaged implements Managed {
   private static final Logger LOG = LoggerFactory.getLogger(BaragonManaged.class);
 
@@ -33,7 +34,7 @@ public class BaragonManaged implements Managed {
   public BaragonManaged(
     Set<AbstractLatchListener> listeners,
     @Named(
-      BaragonServiceModule.BARAGON_SERVICE_SCHEDULED_EXECUTOR
+      BaragonServiceConfiguration.BARAGON_SERVICE_SCHEDULED_EXECUTOR
     ) ScheduledExecutorService executorService,
     @Named(BaragonDataModule.BARAGON_SERVICE_LEADER_LATCH) LeaderLatch leaderLatch,
     @Named(

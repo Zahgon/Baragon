@@ -1,7 +1,18 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.auth.NoAuth;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.models.AgentCheckInResponse;
@@ -10,20 +21,11 @@ import com.hubspot.baragon.models.BaragonGroup;
 import com.hubspot.baragon.models.TrafficSourceState;
 import com.hubspot.baragon.service.gcloud.GoogleCloudManager;
 import com.hubspot.baragon.service.managers.ElbManager;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/checkin")
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(consumes = "application/json", value = "/checkin", produces = "application/json")
 public class AgentCheckinResource {
   private static final Logger LOG = LoggerFactory.getLogger(AgentCheckinResource.class);
 
@@ -42,12 +44,11 @@ public class AgentCheckinResource {
     this.loadBalancerDatastore = loadBalancerDatastore;
   }
 
-  @POST
-  @Path("/{clusterName}/startup")
+  @PostMapping(value = "/{clusterName}/startup")
   public AgentCheckInResponse addAgent(
-    @PathParam("clusterName") String clusterName,
-    @QueryParam("status") boolean status,
-    BaragonAgentMetadata agent
+    @PathVariable("clusterName") String clusterName,
+    @RequestParam(name = "status", required = false, defaultValue = "false") boolean status,
+    @RequestBody BaragonAgentMetadata agent
   ) {
     LOG.info(String.format("Notified of startup for agent %s", agent.getAgentId()));
     AgentCheckInResponse response;
@@ -78,12 +79,11 @@ public class AgentCheckinResource {
     return response;
   }
 
-  @POST
-  @Path("/{clusterName}/shutdown")
+  @PostMapping(value = "/{clusterName}/shutdown")
   public AgentCheckInResponse removeAgent(
-    @PathParam("clusterName") String clusterName,
-    @QueryParam("status") boolean status,
-    BaragonAgentMetadata agent
+    @PathVariable("clusterName") String clusterName,
+    @RequestParam(name = "status", required = false, defaultValue = "false") boolean status,
+    @RequestBody BaragonAgentMetadata agent
   ) {
     LOG.info(String.format("Notified of shutdown for agent %s", agent.getAgentId()));
     AgentCheckInResponse response;
@@ -114,13 +114,11 @@ public class AgentCheckinResource {
     return response;
   }
 
-  @GET
+  @GetMapping(value = "/{clusterName}/can-shutdown", produces = "text/plain")
   @NoAuth
-  @Produces(MediaType.TEXT_PLAIN)
-  @Path("/{clusterName}/can-shutdown")
   public String canShutdownAgent(
-    @PathParam("clusterName") String clusterName,
-    @QueryParam("agentId") String agentId
+    @PathVariable("clusterName") String clusterName,
+    @RequestParam(name = "agentId", required = false) String agentId
   ) {
     Optional<BaragonAgentMetadata> maybeAgent = loadBalancerDatastore.getAgent(
       clusterName,

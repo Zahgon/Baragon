@@ -1,12 +1,13 @@
 package com.hubspot.baragon.data;
 
+import javax.inject.Named;
 import com.codahale.metrics.annotation.Timed;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import com.hubspot.baragon.config.ZooKeeperConfiguration;
 import com.hubspot.baragon.models.AgentRequestId;
 import com.hubspot.baragon.models.AgentRequestType;
@@ -20,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.curator.framework.CuratorFramework;
 
+@Named
 @Singleton
 public class BaragonAgentResponseDatastore extends AbstractDataStore {
   public static final String PENDING_REQUEST_FORMAT = "/request/%s/pendingRequests/%s";

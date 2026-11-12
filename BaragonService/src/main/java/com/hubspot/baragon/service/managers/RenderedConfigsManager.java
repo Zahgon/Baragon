@@ -1,12 +1,12 @@
 package com.hubspot.baragon.service.managers;
 
-import static com.hubspot.baragon.service.BaragonServiceModule.BARAGON_SERVICE_SYNC_HTTP_CLIENT;
+import static com.hubspot.baragon.service.BaragonServiceConfiguration.BARAGON_SERVICE_SYNC_HTTP_CLIENT;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.data.BaragonStateDatastore;
 import com.hubspot.baragon.exceptions.AgentServiceNotifyException;
 import com.hubspot.baragon.models.BaragonAgentMetadata;
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class RenderedConfigsManager {
   private static final Logger LOG = LoggerFactory.getLogger(RenderedConfigsManager.class);
   private static final Random RANDOM = new Random();

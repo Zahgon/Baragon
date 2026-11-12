@@ -3,7 +3,7 @@ package com.hubspot.baragon.agent;
 import com.hubspot.baragon.agent.bundles.CorsBundle;
 import com.hubspot.baragon.agent.config.BaragonAgentConfiguration;
 import com.hubspot.baragon.agent.managed.LifecycleHelper;
-import com.hubspot.baragon.auth.BaragonAuthBundle;
+import com.hubspot.baragon.agent.auth.BaragonAuthBundle;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;

@@ -1,12 +1,11 @@
 package com.hubspot.baragon.auth;
 
 import com.google.common.io.Closeables;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.BaragonDataModule;
 import com.hubspot.baragon.data.BaragonAuthDatastore;
 import com.hubspot.baragon.models.BaragonAuthKey;
-import io.dropwizard.lifecycle.Managed;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.curator.framework.CuratorFramework;
@@ -17,7 +16,7 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BaragonAuthUpdater implements Managed, PathChildrenCacheListener {
+public class BaragonAuthUpdater implements PathChildrenCacheListener {
   private static final Logger LOG = LoggerFactory.getLogger(BaragonAuthUpdater.class);
 
   private final BaragonAuthDatastore datastore;
@@ -37,14 +36,12 @@ public class BaragonAuthUpdater implements Managed, PathChildrenCacheListener {
     this.authKeys = authKeys;
   }
 
-  @Override
   public void start() throws Exception {
     pathChildrenCache.start(StartMode.BUILD_INITIAL_CACHE);
 
     pathChildrenCache.getListenable().addListener(this);
   }
 
-  @Override
   public void stop() throws Exception {
     Closeables.close(pathChildrenCache, true);
   }

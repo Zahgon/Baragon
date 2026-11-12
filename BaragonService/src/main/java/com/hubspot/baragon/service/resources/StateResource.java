@@ -1,30 +1,31 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
+import com.hubspot.baragon.service.platform.http.Response;
+import com.hubspot.baragon.service.platform.http.Response.ResponseBuilder;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Optional;
 import com.google.common.net.HttpHeaders;
-import com.google.inject.Inject;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import com.hubspot.baragon.auth.NoAuth;
 import com.hubspot.baragon.cache.BaragonStateCache;
 import com.hubspot.baragon.cache.CachedBaragonState;
 import com.hubspot.baragon.models.BaragonResponse;
 import com.hubspot.baragon.models.BaragonServiceState;
 import com.hubspot.baragon.service.managers.ServiceManager;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
-@Path("/state")
-@Produces(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(value = "/state", produces = "application/json")
 public class StateResource {
   private final ServiceManager serviceManager;
   private final BaragonStateCache stateCache;
@@ -35,13 +36,15 @@ public class StateResource {
     this.stateCache = stateCache;
   }
 
-  @GET
+  @GetMapping
   @NoAuth
   @Timed
-  public Response getAllServices(
-    @HeaderParam(HttpHeaders.IF_NONE_MATCH) String ifNoneMatch,
-    @HeaderParam(HttpHeaders.ACCEPT_ENCODING) String acceptEncoding
-  ) {
+  public Response getAllServices(HttpServletRequest request) {
+    // A header the API reads as a value holds the first value the request carries under that name,
+    // as it arrived: a request that names the header more than once is read by its first, and a
+    // value that holds a list is read whole.
+    String ifNoneMatch = request.getHeader(HttpHeaders.IF_NONE_MATCH);
+    String acceptEncoding = request.getHeader(HttpHeaders.ACCEPT_ENCODING);
     CachedBaragonState state = stateCache.getState();
     String verisonString = Integer.toString(state.getVersion());
 
@@ -62,30 +65,27 @@ public class StateResource {
     return builder.entity(entity).header(HttpHeaders.ETAG, state.getVersion()).build();
   }
 
-  @GET
+  @GetMapping(value = "/{serviceId}")
   @NoAuth
-  @Path("/{serviceId}")
   public Optional<BaragonServiceState> getService(
-    @PathParam("serviceId") String serviceId
+    @PathVariable("serviceId") String serviceId
   ) {
     return serviceManager.getService(serviceId);
   }
 
-  @POST
-  @Path("/{serviceId}/reload")
+  @PostMapping(value = "/{serviceId}/reload")
   public BaragonResponse reloadConfigs(
-    @PathParam("serviceId") String serviceId,
-    @DefaultValue("false") @QueryParam("noValidate") boolean noValidate
+    @PathVariable("serviceId") String serviceId,
+    @RequestParam(name = "noValidate", required = false, defaultValue = "false") boolean noValidate
   ) {
     return serviceManager.enqueueReloadServiceConfigs(serviceId, noValidate);
   }
 
-  @DELETE
-  @Path("/{serviceId}")
+  @DeleteMapping(value = "/{serviceId}")
   public BaragonResponse removeService(
-    @PathParam("serviceId") String serviceId,
-    @DefaultValue("false") @QueryParam("noValidate") boolean noValidate,
-    @DefaultValue("false") @QueryParam("noReload") boolean noReload
+    @PathVariable("serviceId") String serviceId,
+    @RequestParam(name = "noValidate", required = false, defaultValue = "false") boolean noValidate,
+    @RequestParam(name = "noReload", required = false, defaultValue = "false") boolean noReload
   ) {
     return serviceManager.enqueueRemoveService(serviceId, noValidate, noReload);
   }

@@ -1,7 +1,8 @@
 package com.hubspot.baragon.service.exceptions;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import com.hubspot.baragon.service.platform.http.MediaType;
+import com.hubspot.baragon.service.platform.http.Response;
+import com.hubspot.baragon.service.platform.http.WebApplicationException;
 
 public class BaragonWebException extends WebApplicationException {
 
@@ -21,7 +22,7 @@ public class BaragonWebException extends WebApplicationException {
       Response
         .status(Response.Status.INTERNAL_SERVER_ERROR)
         .entity(message)
-        .type("text/plain")
+        .type(MediaType.TEXT_PLAIN)
         .build()
     );
   }

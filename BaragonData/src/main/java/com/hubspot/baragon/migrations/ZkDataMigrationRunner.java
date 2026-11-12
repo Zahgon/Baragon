@@ -1,14 +1,16 @@
 package com.hubspot.baragon.migrations;
 
+import javax.inject.Named;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import com.hubspot.baragon.data.BaragonZkMetaDatastore;
 import com.hubspot.baragon.utils.JavaUtils;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class ZkDataMigrationRunner {
   private static final Logger LOG = LoggerFactory.getLogger(ZkDataMigrationRunner.class);

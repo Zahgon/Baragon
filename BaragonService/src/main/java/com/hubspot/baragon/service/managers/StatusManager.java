@@ -1,13 +1,13 @@
 package com.hubspot.baragon.service.managers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.inject.Named;
 import com.hubspot.baragon.BaragonDataModule;
 import com.hubspot.baragon.data.BaragonRequestDatastore;
 import com.hubspot.baragon.models.BaragonServiceStatus;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
 import java.util.concurrent.atomic.AtomicLong;
@@ -17,6 +17,7 @@ import org.apache.curator.framework.state.ConnectionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class StatusManager {
   private static final Logger LOG = LoggerFactory.getLogger(StatusManager.class);
@@ -41,7 +42,7 @@ public class StatusManager {
     @Named(
       BaragonDataModule.BARAGON_ZK_CONNECTION_STATE
     ) AtomicReference<ConnectionState> connectionState,
-    @Named(BaragonServiceModule.BARAGON_SERVICE_HTTP_CLIENT) AsyncHttpClient httpClient
+    @Named(BaragonServiceConfiguration.BARAGON_SERVICE_HTTP_CLIENT) AsyncHttpClient httpClient
   ) {
     this.requestDatastore = requestDatastore;
     this.leaderLatch = leaderLatch;

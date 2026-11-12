@@ -7,7 +7,7 @@ import com.hubspot.baragon.config.AuthConfiguration;
 import com.hubspot.baragon.config.GraphiteConfiguration;
 import com.hubspot.baragon.config.HttpClientConfiguration;
 import com.hubspot.baragon.config.ZooKeeperConfiguration;
-import io.dropwizard.Configuration;
+import com.hubspot.baragon.service.platform.Configuration;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;

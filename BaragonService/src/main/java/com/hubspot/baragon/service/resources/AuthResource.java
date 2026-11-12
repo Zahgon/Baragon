@@ -1,29 +1,30 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
+import com.hubspot.baragon.service.platform.http.Response;
+import com.hubspot.baragon.service.platform.http.Response.Status;
+import com.hubspot.baragon.service.platform.http.WebApplicationException;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.auth.NoAuth;
 import com.hubspot.baragon.data.BaragonAuthDatastore;
 import com.hubspot.baragon.models.BaragonAuthKey;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import java.util.Collection;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
-@Path("/auth")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(consumes = "application/json", value = "/auth", produces = "application/json")
 public class AuthResource {
   private final BaragonAuthDatastore datastore;
   private final String masterAuthKey;
@@ -31,20 +32,18 @@ public class AuthResource {
   @Inject
   public AuthResource(
     BaragonAuthDatastore datastore,
-    @Named(BaragonServiceModule.BARAGON_MASTER_AUTH_KEY) String masterAuthKey
+    @Named(BaragonServiceConfiguration.BARAGON_MASTER_AUTH_KEY) String masterAuthKey
   ) {
     this.datastore = datastore;
     this.masterAuthKey = masterAuthKey;
   }
 
-  @GET
-  @Path("/key/verify")
+  @GetMapping(value = "/key/verify")
   public void verifyKey() {}
 
-  @GET
+  @GetMapping(value = "/keys")
   @NoAuth
-  @Path("/keys")
-  public Collection<BaragonAuthKey> getKeys(@QueryParam("authkey") String queryAuthKey) {
+  public Collection<BaragonAuthKey> getKeys(@RequestParam(name = "authkey", required = false) String queryAuthKey) {
     if (!masterAuthKey.equals(queryAuthKey)) {
       throw new WebApplicationException(Response.status(Status.FORBIDDEN).build());
     }
@@ -52,12 +51,11 @@ public class AuthResource {
     return datastore.getAuthKeyMap().values();
   }
 
-  @DELETE
+  @DeleteMapping(value = "/keys/{key}")
   @NoAuth
-  @Path("/keys/{key}")
   public Optional<BaragonAuthKey> expireKey(
-    @PathParam("key") String key,
-    @QueryParam("authkey") String queryAuthKey
+    @PathVariable("key") String key,
+    @RequestParam(name = "authkey", required = false) String queryAuthKey
   ) {
     if (!masterAuthKey.equals(queryAuthKey)) {
       throw new WebApplicationException(Response.status(Status.FORBIDDEN).build());
@@ -66,10 +64,9 @@ public class AuthResource {
     return datastore.expireAuthKey(key);
   }
 
-  @POST
+  @PostMapping(value = "/keys")
   @NoAuth
-  @Path("/keys")
-  public void addKey(BaragonAuthKey authKey, @QueryParam("authkey") String queryAuthKey) {
+  public void addKey(@RequestBody BaragonAuthKey authKey, @RequestParam(name = "authkey", required = false) String queryAuthKey) {
     if (!masterAuthKey.equals(queryAuthKey)) {
       throw new WebApplicationException(Response.status(Status.FORBIDDEN).build());
     }

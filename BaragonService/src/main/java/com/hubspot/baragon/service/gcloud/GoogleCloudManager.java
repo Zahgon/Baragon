@@ -5,18 +5,19 @@ import com.google.api.services.compute.model.BackendServiceGroupHealth;
 import com.google.api.services.compute.model.HealthStatus;
 import com.google.api.services.compute.model.ResourceGroupReference;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.models.AgentCheckInResponse;
 import com.hubspot.baragon.models.BaragonAgentGcloudMetadata;
 import com.hubspot.baragon.models.BaragonAgentMetadata;
 import com.hubspot.baragon.models.TrafficSourceState;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
 import com.hubspot.baragon.service.config.GoogleCloudConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class GoogleCloudManager {
   private static final Logger LOG = LoggerFactory.getLogger(GoogleCloudManager.class);
   private static final String HEALTHY_STATE = "HEALTHY";
@@ -27,7 +28,7 @@ public class GoogleCloudManager {
   @Inject
   public GoogleCloudManager(
     BaragonConfiguration configuration,
-    @Named(BaragonServiceModule.GOOGLE_CLOUD_COMPUTE_SERVICE) Optional<Compute> compute
+    @Named(BaragonServiceConfiguration.GOOGLE_CLOUD_COMPUTE_SERVICE) Optional<Compute> compute
   ) {
     this.compute = compute.orNull();
     this.googleCloudConfiguration = configuration.getGoogleCloudConfiguration();

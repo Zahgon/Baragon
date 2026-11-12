@@ -15,8 +15,8 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerRequest;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.data.BaragonKnownAgentsDatastore;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.models.AgentCheckInResponse;
@@ -26,7 +26,7 @@ import com.hubspot.baragon.models.RegisterBy;
 import com.hubspot.baragon.models.TrafficSource;
 import com.hubspot.baragon.models.TrafficSourceState;
 import com.hubspot.baragon.models.TrafficSourceType;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.ElbConfiguration;
 import com.hubspot.baragon.service.exceptions.BaragonExceptionNotifier;
 import java.util.ArrayList;
@@ -36,6 +36,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class ClassicLoadBalancer extends ElasticLoadBalancer {
   private static final Logger LOG = LoggerFactory.getLogger(ClassicLoadBalancer.class);
   private final AmazonElasticLoadBalancing elbClient;
@@ -47,7 +48,7 @@ public class ClassicLoadBalancer extends ElasticLoadBalancer {
     BaragonLoadBalancerDatastore loadBalancerDatastore,
     BaragonKnownAgentsDatastore knownAgentsDatastore,
     @Named(
-      BaragonServiceModule.BARAGON_AWS_ELB_CLIENT_V1
+      BaragonServiceConfiguration.BARAGON_AWS_ELB_CLIENT_V1
     ) AmazonElasticLoadBalancing elbClient
   ) {
     super(configuration, exceptionNotifier, loadBalancerDatastore, knownAgentsDatastore);

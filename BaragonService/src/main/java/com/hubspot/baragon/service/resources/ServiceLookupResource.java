@@ -1,8 +1,19 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.auth.NoAuth;
 import com.hubspot.baragon.cache.BaragonStateCache;
 import com.hubspot.baragon.models.BaragonServiceState;
@@ -11,14 +22,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
-@Path("/service-lookup")
-@Produces(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(value = "/service-lookup", produces = "application/json")
 public class ServiceLookupResource {
   private final ObjectMapper objectMapper;
   private final BaragonStateCache stateCache;
@@ -29,9 +35,9 @@ public class ServiceLookupResource {
     this.stateCache = stateCache;
   }
 
-  @GET
+  @GetMapping
   @NoAuth
-  public List<BaragonServiceState> getServices(@QueryParam("hostPort") String hostPort) {
+  public List<BaragonServiceState> getServices(@RequestParam(name = "hostPort", required = false) String hostPort) {
     // Important - Normally, only a single service is on a given host and port. But in the past we've seen a critsit
     // where multiple services were on the same host and port. This endpoint returns a collection so we can easily
     // identify that scenario occur in the future.

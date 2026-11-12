@@ -7,19 +7,20 @@ import com.codahale.metrics.graphite.Graphite;
 import com.codahale.metrics.graphite.GraphiteReporter;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.inject.Named;
 import com.hubspot.baragon.config.GraphiteConfiguration;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
 import com.hubspot.baragon.utils.JavaUtils;
-import io.dropwizard.lifecycle.Managed;
+import com.hubspot.baragon.service.platform.Managed;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class BaragonGraphiteReporterManaged implements Managed {
   private static final Logger LOG = LoggerFactory.getLogger(
@@ -35,7 +36,7 @@ public class BaragonGraphiteReporterManaged implements Managed {
   public BaragonGraphiteReporterManaged(
     BaragonConfiguration configuration,
     MetricRegistry registry,
-    @Named(BaragonServiceModule.BARAGON_SERVICE_LOCAL_HOSTNAME) String hostname
+    @Named(BaragonServiceConfiguration.BARAGON_SERVICE_LOCAL_HOSTNAME) String hostname
   ) {
     this.graphiteConfiguration = configuration.getGraphiteConfiguration();
     this.registry = registry;

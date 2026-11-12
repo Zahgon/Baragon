@@ -1,7 +1,19 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
+import com.hubspot.baragon.service.platform.http.WebApplicationException;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.auth.NoAuth;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.data.BaragonStateDatastore;
@@ -24,23 +36,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/request")
-@Consumes({ MediaType.APPLICATION_JSON })
-@Produces(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(consumes = "application/json", value = "/request", produces = "application/json")
 public class RequestResource {
   private static final Logger LOG = LoggerFactory.getLogger(RequestResource.class);
 
@@ -65,15 +65,14 @@ public class RequestResource {
     this.purgeCacheManager = purgeCacheManager;
   }
 
-  @GET
+  @GetMapping(value = "/{requestId}")
   @NoAuth
-  @Path("/{requestId}")
-  public Optional<BaragonResponse> getResponse(@PathParam("requestId") String requestId) {
+  public Optional<BaragonResponse> getResponse(@PathVariable("requestId") String requestId) {
     return manager.getResponse(requestId);
   }
 
-  @POST
-  public BaragonResponse enqueueRequest(@Valid BaragonRequest request) {
+  @PostMapping
+  public BaragonResponse enqueueRequest(@RequestBody @Valid BaragonRequest request) {
     try {
       BaragonRequest updatedForAliases = aliasManager.updateForAliases(request);
       BaragonRequest updatedForDefaultDomains = loadBalancerDatastore.updateForDefaultDomains(
@@ -90,24 +89,22 @@ public class RequestResource {
     }
   }
 
-  @GET
+  @GetMapping
   @NoAuth
   public List<QueuedRequestId> getQueuedRequestIds() {
     return manager.getQueuedRequestIds();
   }
 
-  @GET
+  @GetMapping(value = "/history/{serviceId}")
   @NoAuth
-  @Path("/history/{serviceId}")
   public List<BaragonResponse> getRecentRequestIds(
-    @PathParam("serviceId") String serviceId
+    @PathVariable("serviceId") String serviceId
   ) {
     return manager.getResponsesForService(serviceId);
   }
 
-  @DELETE
-  @Path("/{requestId}")
-  public BaragonResponse cancelRequest(@PathParam("requestId") String requestId) {
+  @DeleteMapping(value = "/{requestId}")
+  public BaragonResponse cancelRequest(@PathVariable("requestId") String requestId) {
     // prevent race conditions when transitioning from a cancel-able to not cancel-able state
     synchronized (BaragonRequestWorker.class) {
       manager.cancelRequest(requestId);
@@ -117,11 +114,10 @@ public class RequestResource {
     }
   }
 
-  @PUT
-  @Path("/upstreams/{serviceId}")
+  @PutMapping(value = "/upstreams/{serviceId}")
   public BaragonResponse addUpstream(
-    @PathParam("serviceId") String serviceId,
-    @QueryParam("upstream") String upstream
+    @PathVariable("serviceId") String serviceId,
+    @RequestParam(name = "upstream", required = false) String upstream
   ) {
     UpstreamInfo upstreamInfo = UpstreamInfo.fromString(upstream);
     Optional<BaragonService> maybeService = stateDatastore.getService(serviceId);
@@ -146,11 +142,10 @@ public class RequestResource {
     );
   }
 
-  @POST
-  @Path("/upstreams/{serviceId}")
+  @PostMapping(value = "/upstreams/{serviceId}")
   public BaragonResponse setUpstreams(
-    @PathParam("serviceId") String serviceId,
-    List<UpstreamInfo> upstreams
+    @PathVariable("serviceId") String serviceId,
+    @RequestBody List<UpstreamInfo> upstreams
   ) {
     Optional<BaragonService> maybeService = stateDatastore.getService(serviceId);
     if (!maybeService.isPresent()) {
@@ -174,11 +169,10 @@ public class RequestResource {
     );
   }
 
-  @DELETE
-  @Path("/upstreams/{serviceId}")
+  @DeleteMapping(value = "/upstreams/{serviceId}")
   public BaragonResponse removeUpstream(
-    @PathParam("serviceId") String serviceId,
-    @QueryParam("upstream") String upstream
+    @PathVariable("serviceId") String serviceId,
+    @RequestParam(name = "upstream", required = false) String upstream
   ) {
     UpstreamInfo upstreamInfo = UpstreamInfo.fromString(upstream);
     Optional<BaragonService> maybeService = stateDatastore.getService(serviceId);
@@ -210,10 +204,9 @@ public class RequestResource {
     );
   }
 
-  @DELETE
-  @Path("/upstream")
+  @DeleteMapping(value = "/upstream")
   public Set<BaragonResponse> deleteOccurencesOfUpstream(
-    @QueryParam("host") String host
+    @RequestParam(name = "host", required = false) String host
   ) {
     if (host == null) {
       throw new WebApplicationException("host must not be null", 400);

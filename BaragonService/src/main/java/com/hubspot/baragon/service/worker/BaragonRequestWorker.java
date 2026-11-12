@@ -3,9 +3,9 @@ package com.hubspot.baragon.service.worker;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.inject.Named;
 import com.hubspot.baragon.BaragonDataModule;
 import com.hubspot.baragon.data.BaragonStateDatastore;
 import com.hubspot.baragon.models.AgentRequestType;
@@ -41,6 +41,7 @@ import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class BaragonRequestWorker implements Runnable {
   private static final Logger LOG = LoggerFactory.getLogger(BaragonRequestWorker.class);

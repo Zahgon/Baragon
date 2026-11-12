@@ -1,10 +1,11 @@
 package com.hubspot.baragon.service.managers;
 
+import javax.inject.Named;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.elasticloadbalancing.model.Instance;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.models.AgentCheckInResponse;
 import com.hubspot.baragon.models.BaragonAgentMetadata;
@@ -22,6 +23,7 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class ElbManager {
   private static final Logger LOG = LoggerFactory.getLogger(ElbManager.class);

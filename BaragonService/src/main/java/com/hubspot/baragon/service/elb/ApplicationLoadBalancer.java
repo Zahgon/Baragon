@@ -45,8 +45,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.data.BaragonKnownAgentsDatastore;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.models.AgentCheckInResponse;
@@ -56,7 +56,7 @@ import com.hubspot.baragon.models.RegisterBy;
 import com.hubspot.baragon.models.TrafficSource;
 import com.hubspot.baragon.models.TrafficSourceState;
 import com.hubspot.baragon.models.TrafficSourceType;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.ElbConfiguration;
 import com.hubspot.baragon.service.exceptions.BaragonExceptionNotifier;
 import java.util.Collection;
@@ -81,6 +81,7 @@ import org.slf4j.LoggerFactory;
  * for the health of instance 12345, then you will actually expect the health
  * of target 12345.
  */
+@Named
 public class ApplicationLoadBalancer extends ElasticLoadBalancer {
   private static final int MAX_TARGET_GROUP_PAGE_SIZE = 400;
 
@@ -98,7 +99,7 @@ public class ApplicationLoadBalancer extends ElasticLoadBalancer {
     BaragonLoadBalancerDatastore loadBalancerDatastore,
     BaragonKnownAgentsDatastore knownAgentsDatastore,
     @Named(
-      BaragonServiceModule.BARAGON_AWS_ELB_CLIENT_V2
+      BaragonServiceConfiguration.BARAGON_AWS_ELB_CLIENT_V2
     ) AmazonElasticLoadBalancing elbClient
   ) {
     super(configuration, exceptionNotifier, loadBalancerDatastore, knownAgentsDatastore);

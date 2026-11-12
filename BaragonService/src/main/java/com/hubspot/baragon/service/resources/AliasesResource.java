@@ -1,21 +1,23 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.data.BaragonAliasDatastore;
 import com.hubspot.baragon.models.BaragonGroupAlias;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
-@Path("/aliases")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(consumes = "application/json", value = "/aliases", produces = "application/json")
 public class AliasesResource {
   private final BaragonAliasDatastore aliasDatastore;
 
@@ -24,25 +26,22 @@ public class AliasesResource {
     this.aliasDatastore = aliasDatastore;
   }
 
-  @POST
-  @Path("/{name}")
+  @PostMapping(value = "/{name}")
   public BaragonGroupAlias createAlias(
-    @PathParam("name") String name,
-    BaragonGroupAlias alias
+    @PathVariable("name") String name,
+    @RequestBody BaragonGroupAlias alias
   ) {
     aliasDatastore.saveAlias(name, alias);
     return alias;
   }
 
-  @GET
-  @Path("/{name}")
-  public Optional<BaragonGroupAlias> getAlias(@PathParam("name") String name) {
+  @GetMapping(value = "/{name}")
+  public Optional<BaragonGroupAlias> getAlias(@PathVariable("name") String name) {
     return aliasDatastore.getAlias(name);
   }
 
-  @DELETE
-  @Path("/{name}")
-  public void deleteAlias(@PathParam("name") String name) {
+  @DeleteMapping(value = "/{name}")
+  public void deleteAlias(@PathVariable("name") String name) {
     aliasDatastore.deleteAlias(name);
   }
 }

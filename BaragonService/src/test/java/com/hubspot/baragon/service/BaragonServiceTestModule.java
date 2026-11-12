@@ -4,42 +4,33 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.google.inject.AbstractModule;
-import com.google.inject.Binder;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Scopes;
-import com.google.inject.Stage;
-import com.google.inject.util.Modules;
 import com.hubspot.baragon.config.ZooKeeperConfiguration;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
 import com.hubspot.baragon.service.managers.AgentManager;
 import com.hubspot.baragon.service.managers.TestAgentManager;
-import com.hubspot.dropwizard.guicier.DropwizardModule;
-import io.dropwizard.setup.Environment;
+import com.hubspot.baragon.service.platform.Environment;
 import org.apache.curator.test.TestingServer;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
-public class BaragonServiceTestModule extends AbstractModule {
+/**
+ * The components of the service, built as the service builds them, around a state store of this
+ * test's own: a ZooKeeper server in this process, under a namespace of its own, and an agent manager
+ * that records what it was asked to send instead of sending it.
+ */
+@Configuration
+@Import({ ObjectMapperConfiguration.class, BaragonServiceConfiguration.class })
+public class BaragonServiceTestModule {
+  private static final String TEST_NAMESPACE = "baragontesting";
+
   private final TestingServer ts;
-  private final DropwizardModule dropwizardModule;
-  private final ObjectMapper om = getObjectMapper();
-  private final Environment environment = new Environment(
-    "test-env",
-    om,
-    null,
-    new MetricRegistry(),
-    null
-  );
 
   public BaragonServiceTestModule() throws Exception {
     this.ts = new TestingServer();
-
-    this.dropwizardModule = new DropwizardModule(environment);
 
     LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
     Logger rootLogger = context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
@@ -53,46 +44,40 @@ public class BaragonServiceTestModule extends AbstractModule {
     );
   }
 
-  @Override
-  protected void configure() {
-    bind(TestingServer.class).toInstance(ts);
-    BaragonConfiguration baragonConfiguration = getBaragonConfigurationForTestingServer(
-      ts
-    );
-    bind(BaragonConfiguration.class).toInstance(baragonConfiguration);
-    BaragonServiceModule serviceModule = new BaragonServiceModule();
-    serviceModule.setConfiguration(baragonConfiguration);
-    serviceModule.setEnvironment(environment);
-    binder()
-      .install(
-        Modules
-          .override(serviceModule)
-          .with(
-            new Module() {
-
-              @Override
-              public void configure(Binder binder) {
-                binder.bind(ObjectMapper.class).toInstance(om);
-                binder.bind(Environment.class).toInstance(environment);
-                bind(TestAgentManager.class).in(Scopes.SINGLETON);
-                binder.bind(AgentManager.class).to(TestAgentManager.class);
-              }
-            }
-          )
-      );
+  @Bean
+  public TestingServer testingServer() {
+    return ts;
   }
 
-  public Injector getInjector() throws Exception {
-    return Guice.createInjector(Stage.PRODUCTION, dropwizardModule, this);
+  @Bean
+  public BaragonConfiguration baragonConfiguration() {
+    return getBaragonConfigurationForTestingServer(ts);
   }
 
-  private static ObjectMapper getObjectMapper() {
-    final ObjectMapper objectMapper = new ObjectMapper();
+  @Bean
+  public Environment baragonEnvironment() {
+    return new Environment("test-env", ObjectMappers.forApi(), null, new MetricRegistry());
+  }
 
-    objectMapper.registerModule(new GuavaModule());
-    objectMapper.registerModule(new Jdk8Module());
+  /**
+   * The agent manager a test is given, in place of the one that talks to agents. The method is not named
+   * after the bean it returns: a @Bean method whose name is already taken by a registered bean definition is
+   * skipped, and this one would then never mark anything primary, leaving the manager that talks to agents as
+   * the one the workers are given.
+   */
+  @Bean
+  @Primary
+  public AgentManager recordingAgentManager(TestAgentManager testAgentManager) {
+    return testAgentManager;
+  }
 
-    return objectMapper;
+  /** The components of the service, built and ready to be read by a test. */
+  public AnnotationConfigApplicationContext getContext() {
+    final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+    context.register(BaragonServiceTestModule.class, TestAgentManager.class);
+    context.getBeanFactory().registerSingleton("baragonServiceTestModule", this);
+    context.refresh();
+    return context;
   }
 
   private static BaragonConfiguration getBaragonConfigurationForTestingServer(
@@ -105,8 +90,10 @@ public class BaragonServiceTestModule extends AbstractModule {
     zookeeperConfiguration.setRetryBaseSleepTimeMilliseconds(1000);
     zookeeperConfiguration.setRetryMaxTries(1);
     zookeeperConfiguration.setSessionTimeoutMillis(1000);
-    zookeeperConfiguration.setZkNamespace("baragontesting");
+    zookeeperConfiguration.setZkNamespace(TEST_NAMESPACE);
     config.setZooKeeperConfiguration(zookeeperConfiguration);
+    // the hostname the service knows itself by, which a test does not read from its own networking
+    config.setHostname("localhost");
 
     return config;
   }

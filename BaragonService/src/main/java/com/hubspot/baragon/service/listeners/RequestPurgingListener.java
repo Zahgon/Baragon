@@ -1,7 +1,7 @@
 package com.hubspot.baragon.service.listeners;
 
-import com.google.inject.Inject;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import javax.inject.Inject;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
 import com.hubspot.baragon.service.worker.RequestPurgingWorker;
 import java.util.concurrent.ScheduledExecutorService;
@@ -11,6 +11,7 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class RequestPurgingListener extends AbstractLatchListener {
   private static final Logger LOG = LoggerFactory.getLogger(RequestPurgingListener.class);
 
@@ -23,7 +24,7 @@ public class RequestPurgingListener extends AbstractLatchListener {
   @Inject
   public RequestPurgingListener(
     @Named(
-      BaragonServiceModule.BARAGON_SERVICE_SCHEDULED_EXECUTOR
+      BaragonServiceConfiguration.BARAGON_SERVICE_SCHEDULED_EXECUTOR
     ) ScheduledExecutorService executorService,
     BaragonConfiguration configuration,
     RequestPurgingWorker requestPurgingWorker

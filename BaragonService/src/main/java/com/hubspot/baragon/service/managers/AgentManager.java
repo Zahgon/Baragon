@@ -7,9 +7,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.inject.Named;
 import com.hubspot.baragon.BaragonDataModule;
 import com.hubspot.baragon.data.BaragonAgentResponseDatastore;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
@@ -28,7 +28,7 @@ import com.hubspot.baragon.models.InternalRequestStates;
 import com.hubspot.baragon.models.InternalStatesMap;
 import com.hubspot.baragon.models.QueuedRequestWithState;
 import com.hubspot.baragon.models.RequestAction;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
@@ -42,11 +42,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import com.hubspot.baragon.service.platform.http.HttpHeaders;
+import com.hubspot.baragon.service.platform.http.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class AgentManager {
   private static final Logger LOG = LoggerFactory.getLogger(AgentManager.class);
@@ -72,7 +73,7 @@ public class AgentManager {
     BaragonConfiguration configuration,
     ObjectMapper objectMapper,
     @Named(
-      BaragonServiceModule.BARAGON_SERVICE_HTTP_CLIENT
+      BaragonServiceConfiguration.BARAGON_SERVICE_HTTP_CLIENT
     ) AsyncHttpClient asyncHttpClient,
     @Named(
       BaragonDataModule.BARAGON_AGENT_REQUEST_URI_FORMAT

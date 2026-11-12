@@ -1,23 +1,31 @@
 package com.hubspot.baragon.service.resources;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.auth.NoAuth;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
 import com.hubspot.baragon.service.views.IndexView;
 import javax.inject.Singleton;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Serves as the base for the UI, returns the mustache view for the actual GUI.
  */
 @Singleton
-@Path(UIResource.UI_RESOURCE_LOCATION + "{uiPath:.*}")
 @NoAuth
+@RestController
+@RequestMapping(value = UIResource.UI_RESOURCE_LOCATION + "{uiPath:.*}")
 public class UIResource {
   static final String UI_RESOURCE_LOCATION = "/ui";
 
@@ -26,15 +34,14 @@ public class UIResource {
 
   @Inject
   public UIResource(
-    @Named(BaragonServiceModule.BARAGON_URI_BASE) String baragonUriBase,
+    @Named(BaragonServiceConfiguration.BARAGON_URI_BASE) String baragonUriBase,
     BaragonConfiguration configuration
   ) {
     this.configuration = configuration;
     this.baragonUriBase = baragonUriBase;
   }
 
-  @GET
-  @Produces(MediaType.TEXT_HTML)
+  @GetMapping(produces = "text/html")
   public IndexView getIndex() {
     return new IndexView(baragonUriBase, UI_RESOURCE_LOCATION, configuration);
   }

@@ -7,12 +7,14 @@ import com.github.jknack.handlebars.Handlebars;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.hubspot.baragon.BaragonDataModule;
+import com.hubspot.baragon.agent.auth.BaragonAuthFeature;
+import com.hubspot.baragon.agent.auth.BaragonAuthFilter;
 import com.hubspot.baragon.agent.config.BaragonAgentConfiguration;
 import com.hubspot.baragon.agent.config.LoadBalancerConfiguration;
 import com.hubspot.baragon.agent.config.TemplateConfiguration;
@@ -57,6 +59,7 @@ import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.hubspot.horizon.HttpConfig;
 import com.hubspot.horizon.ning.NingHttpClient;
 import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.setup.Environment;
 import io.dropwizard.server.SimpleServerFactory;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -103,7 +106,11 @@ public class BaragonAgentServiceModule
     binder.requireExactBindingAnnotations();
     binder.requireAtInjectOnConstructors();
 
-    binder.install(new BaragonDataModule());
+    binder.install(new BaragonAgentDataModule());
+
+    // the Jersey pieces that read the key a request carries
+    binder.bind(BaragonAuthFeature.class).in(Scopes.SINGLETON);
+    binder.bind(BaragonAuthFilter.class).in(Scopes.SINGLETON);
     binder.install(new BargonAgentResourcesModule());
 
     // Healthchecks
@@ -438,5 +445,11 @@ public class BaragonAgentServiceModule
   @Named(INTERNAL_STATE_CACHE)
   public Map<String, BasicServiceContext> provideStateCache() {
     return new ConcurrentHashMap<>();
+  }
+
+  @Provides
+  @Singleton
+  public MetricRegistry provideRegistry(Environment environment) {
+    return environment.metrics();
   }
 }

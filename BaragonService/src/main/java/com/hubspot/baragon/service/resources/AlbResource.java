@@ -1,5 +1,19 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
+import com.hubspot.baragon.service.platform.http.Response;
+import com.hubspot.baragon.service.platform.http.Response.Status;
+import com.hubspot.baragon.service.platform.http.WebApplicationException;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.elasticloadbalancingv2.model.CreateListenerRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.CreateRuleRequest;
@@ -16,7 +30,7 @@ import com.amazonaws.services.elasticloadbalancingv2.model.TargetGroup;
 import com.amazonaws.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
 import com.amazonaws.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.auth.NoAuth;
 import com.hubspot.baragon.models.AgentCheckInResponse;
 import com.hubspot.baragon.service.config.ElbConfiguration;
@@ -24,20 +38,9 @@ import com.hubspot.baragon.service.elb.ApplicationLoadBalancer;
 import com.hubspot.baragon.service.exceptions.BaragonWebException;
 import java.util.Collection;
 import javax.validation.Valid;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
-@Path("/albs")
-@Produces(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(value = "/albs", produces = "application/json")
 public class AlbResource {
   private final ApplicationLoadBalancer applicationLoadBalancer;
   private final Optional<ElbConfiguration> config;
@@ -51,9 +54,8 @@ public class AlbResource {
     this.config = config;
   }
 
-  @GET
+  @GetMapping(value = "/load-balancers")
   @NoAuth
-  @Path("/load-balancers")
   public Collection<LoadBalancer> getAllLoadBalancers() {
     if (config.isPresent()) {
       return applicationLoadBalancer.getAllLoadBalancers();
@@ -64,10 +66,9 @@ public class AlbResource {
     }
   }
 
-  @GET
+  @GetMapping(value = "/load-balancers/{elbName}")
   @NoAuth
-  @Path("/load-balancers/{elbName}")
-  public LoadBalancer getLoadBalancer(@PathParam("elbName") String elbName) {
+  public LoadBalancer getLoadBalancer(@PathVariable("elbName") String elbName) {
     if (config.isPresent()) {
       try {
         Optional<LoadBalancer> maybeLoadBalancer = applicationLoadBalancer.getLoadBalancer(
@@ -91,10 +92,9 @@ public class AlbResource {
     }
   }
 
-  @GET
+  @GetMapping(value = "/load-balancers/{elbName}/listeners")
   @NoAuth
-  @Path("/load-balancers/{elbName}/listeners")
-  public Collection<Listener> getListeners(@PathParam("elbName") String elbName) {
+  public Collection<Listener> getListeners(@PathVariable("elbName") String elbName) {
     if (config.isPresent()) {
       try {
         return applicationLoadBalancer.getListenersForElb(elbName);
@@ -108,11 +108,10 @@ public class AlbResource {
     }
   }
 
-  @POST
-  @Path("/load-balancers/{elbName}/listeners")
+  @PostMapping(value = "/load-balancers/{elbName}/listeners")
   public Listener createListeners(
-    @PathParam("elbName") String elbName,
-    @Valid CreateListenerRequest createListenerRequest
+    @PathVariable("elbName") String elbName,
+    @RequestBody @Valid CreateListenerRequest createListenerRequest
   ) {
     if (config.isPresent()) {
       Optional<LoadBalancer> maybeLoadBalancer = applicationLoadBalancer.getLoadBalancer(
@@ -137,12 +136,11 @@ public class AlbResource {
     }
   }
 
-  @POST
-  @Path("/listeners/{listenerArn:.+}")
+  @PostMapping(value = "/listeners/{listenerArn:.+}")
   public Listener updateListener(
-    @PathParam("elbName") String elbName,
-    @PathParam("listenerArn") String listenerArn,
-    @Valid ModifyListenerRequest modifyListenerRequest
+    @PathVariable("elbName") String elbName,
+    @PathVariable("listenerArn") String listenerArn,
+    @RequestBody @Valid ModifyListenerRequest modifyListenerRequest
   ) {
     if (config.isPresent()) {
       try {
@@ -164,11 +162,10 @@ public class AlbResource {
     }
   }
 
-  @DELETE
-  @Path("/listeners/{listenerArn:.+}")
+  @DeleteMapping(value = "/listeners/{listenerArn:.+}")
   public Response removeListener(
-    @PathParam("elbName") String elbName,
-    @PathParam("listenerArn") String listenerArn
+    @PathVariable("elbName") String elbName,
+    @PathVariable("listenerArn") String listenerArn
   ) {
     if (config.isPresent()) {
       try {
@@ -189,12 +186,11 @@ public class AlbResource {
     }
   }
 
-  @GET
+  @GetMapping(value = "/listeners/rules/{listenerArn:.+}")
   @NoAuth
-  @Path("/listeners/rules/{listenerArn:.+}")
   public Collection<Rule> getRules(
-    @PathParam("elbName") String elbName,
-    @PathParam("listenerArn") String listenerArn
+    @PathVariable("elbName") String elbName,
+    @PathVariable("listenerArn") String listenerArn
   ) {
     if (config.isPresent()) {
       try {
@@ -214,12 +210,11 @@ public class AlbResource {
     }
   }
 
-  @POST
-  @Path("/listeners/rules/{listenerArn:.+}")
+  @PostMapping(value = "/listeners/rules/{listenerArn:.+}")
   public Rule createRule(
-    @PathParam("elbName") String elbName,
-    @PathParam("listenerArn") String listenerArn,
-    @Valid CreateRuleRequest createRuleRequest
+    @PathVariable("elbName") String elbName,
+    @PathVariable("listenerArn") String listenerArn,
+    @RequestBody @Valid CreateRuleRequest createRuleRequest
   ) {
     if (config.isPresent()) {
       try {
@@ -241,13 +236,12 @@ public class AlbResource {
     }
   }
 
-  @POST
-  @Path("/rules/{ruleArn:.+}")
+  @PostMapping(value = "/rules/{ruleArn:.+}")
   public Rule updateRule(
-    @PathParam("elbName") String elbName,
-    @PathParam("listenerArn") String listenerArn,
-    @PathParam("ruleArn") String ruleArn,
-    @Valid ModifyRuleRequest modifyRuleRequest
+    @PathVariable("elbName") String elbName,
+    @PathVariable("listenerArn") String listenerArn,
+    @PathVariable("ruleArn") String ruleArn,
+    @RequestBody @Valid ModifyRuleRequest modifyRuleRequest
   ) {
     if (config.isPresent()) {
       try {
@@ -267,12 +261,11 @@ public class AlbResource {
     }
   }
 
-  @DELETE
-  @Path("/rules/{ruleArn:.+}")
+  @DeleteMapping(value = "/rules/{ruleArn:.+}")
   public Response deleteRule(
-    @PathParam("elbName") String elbName,
-    @PathParam("listenerArn") String listenerArn,
-    @PathParam("ruleArn") String ruleArn
+    @PathVariable("elbName") String elbName,
+    @PathVariable("listenerArn") String listenerArn,
+    @PathVariable("ruleArn") String ruleArn
   ) {
     if (config.isPresent()) {
       try {
@@ -293,9 +286,8 @@ public class AlbResource {
     }
   }
 
-  @GET
+  @GetMapping(value = "/target-groups")
   @NoAuth
-  @Path("/target-groups")
   public Collection<TargetGroup> getAllTargetGroups() {
     if (config.isPresent()) {
       return applicationLoadBalancer.getAllTargetGroups();
@@ -306,10 +298,10 @@ public class AlbResource {
     }
   }
 
-  @POST
-  @PathParam("/target-groups")
+  @PostMapping
+  // the repository names a path parameter here rather than a path, so this answers on the class's path
   public TargetGroup createTargetGroup(
-    @Valid CreateTargetGroupRequest createTargetGroupRequest
+    @RequestBody @Valid CreateTargetGroupRequest createTargetGroupRequest
   ) {
     if (config.isPresent()) {
       try {
@@ -324,10 +316,9 @@ public class AlbResource {
     }
   }
 
-  @GET
+  @GetMapping(value = "/target-groups/{targetGroup}")
   @NoAuth
-  @Path("/target-groups/{targetGroup}")
-  public TargetGroup getTargetGroup(@PathParam("targetGroup") String targetGroup) {
+  public TargetGroup getTargetGroup(@PathVariable("targetGroup") String targetGroup) {
     if (config.isPresent()) {
       try {
         Optional<TargetGroup> maybeTargetGroup = applicationLoadBalancer.getTargetGroup(
@@ -351,11 +342,10 @@ public class AlbResource {
     }
   }
 
-  @POST
-  @Path("/target-groups/{targetGroup}")
+  @PostMapping(value = "/target-groups/{targetGroup}")
   public TargetGroup modifyTargetGroup(
-    @PathParam("targetGroup") String targetGroup,
-    @Valid ModifyTargetGroupRequest modifyTargetGroupRequest
+    @PathVariable("targetGroup") String targetGroup,
+    @RequestBody @Valid ModifyTargetGroupRequest modifyTargetGroupRequest
   ) {
     if (config.isPresent()) {
       try {
@@ -375,11 +365,10 @@ public class AlbResource {
     }
   }
 
-  @GET
+  @GetMapping(value = "/target-groups/{targetGroup}/targets")
   @NoAuth
-  @Path("/target-groups/{targetGroup}/targets")
   public Collection<TargetHealthDescription> getTargets(
-    @PathParam("targetGroup") String targetGroup
+    @PathVariable("targetGroup") String targetGroup
   ) {
     if (config.isPresent()) {
       try {
@@ -404,11 +393,10 @@ public class AlbResource {
     }
   }
 
-  @DELETE
-  @Path("/target-groups/{targetGroup}/targets/{instanceId}")
+  @DeleteMapping(value = "/target-groups/{targetGroup}/targets/{instanceId}")
   public AgentCheckInResponse removeFromTargetGroup(
-    @PathParam("targetGroup") String targetGroup,
-    @PathParam("instanceId") String instanceId
+    @PathVariable("targetGroup") String targetGroup,
+    @PathVariable("instanceId") String instanceId
   ) {
     if (instanceId == null) {
       throw new BaragonWebException(
@@ -431,11 +419,10 @@ public class AlbResource {
     }
   }
 
-  @POST
-  @Path("/target-group/{targetGroup}/targets")
+  @PostMapping(value = "/target-group/{targetGroup}/targets")
   public AgentCheckInResponse addToTargetGroup(
-    @PathParam("targetGroup") String targetGroup,
-    @QueryParam("instanceId") String instanceId
+    @PathVariable("targetGroup") String targetGroup,
+    @RequestParam(name = "instanceId", required = false) String instanceId
   ) {
     if (instanceId == null) {
       throw new BaragonWebException("Must provide instance ID to add target to group");

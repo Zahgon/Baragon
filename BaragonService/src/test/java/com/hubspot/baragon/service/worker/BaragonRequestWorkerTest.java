@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.models.AgentRequestType;
 import com.hubspot.baragon.models.BaragonRequestBuilder;
 import com.hubspot.baragon.models.InternalRequestStates;

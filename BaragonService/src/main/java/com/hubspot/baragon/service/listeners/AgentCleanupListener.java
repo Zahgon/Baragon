@@ -1,9 +1,9 @@
 package com.hubspot.baragon.service.listeners;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.data.BaragonKnownAgentsDatastore;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +11,7 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class AgentCleanupListener extends AbstractLatchListener {
   private static final Logger LOG = LoggerFactory.getLogger(ElbSyncWorkerListener.class);
 
@@ -23,7 +24,7 @@ public class AgentCleanupListener extends AbstractLatchListener {
   @Inject
   public AgentCleanupListener(
     @Named(
-      BaragonServiceModule.BARAGON_SERVICE_SCHEDULED_EXECUTOR
+      BaragonServiceConfiguration.BARAGON_SERVICE_SCHEDULED_EXECUTOR
     ) ScheduledExecutorService executorService,
     BaragonKnownAgentsDatastore knownAgentsDatastore,
     BaragonLoadBalancerDatastore loadBalancerDatastore

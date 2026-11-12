@@ -1,8 +1,9 @@
 package com.hubspot.baragon.service.managers;
 
+import javax.inject.Named;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.data.BaragonStateDatastore;
 import com.hubspot.baragon.models.BaragonRequest;
 import com.hubspot.baragon.models.BaragonRequestBuilder;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Named
 public class ServiceManager {
   private final BaragonStateDatastore stateDatastore;
   private final RequestManager requestManager;

@@ -6,8 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.dropwizard.configuration.ConfigurationSourceProvider;
-import io.dropwizard.jackson.Jackson;
+import com.hubspot.baragon.service.platform.ConfigurationSourceProvider;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +21,7 @@ public class MergingConfigProviderTest {
 
   private static final YAMLFactory YAML_FACTORY = new YAMLFactory();
 
-  ObjectMapper objectMapper = Jackson
-    .newObjectMapper()
+  ObjectMapper objectMapper = ConfigurationObjectMapper.newObjectMapper()
     .setSerializationInclusion(Include.NON_NULL)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 

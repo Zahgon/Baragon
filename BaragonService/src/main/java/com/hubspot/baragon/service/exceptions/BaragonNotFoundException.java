@@ -1,7 +1,8 @@
 package com.hubspot.baragon.service.exceptions;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import com.hubspot.baragon.service.platform.http.MediaType;
+import com.hubspot.baragon.service.platform.http.Response;
+import com.hubspot.baragon.service.platform.http.WebApplicationException;
 
 public class BaragonNotFoundException extends WebApplicationException {
 
@@ -18,11 +19,7 @@ public class BaragonNotFoundException extends WebApplicationException {
    */
   public BaragonNotFoundException(String message) {
     super(
-      Response
-        .status(Response.Status.NOT_FOUND)
-        .entity(message)
-        .type("text/plain")
-        .build()
+      Response.status(Response.Status.NOT_FOUND).entity(message).type(MediaType.TEXT_PLAIN).build()
     );
   }
 }

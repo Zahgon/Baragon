@@ -1,13 +1,15 @@
 package com.hubspot.baragon.data;
 
+import javax.inject.Named;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.config.ZooKeeperConfiguration;
 import org.apache.curator.framework.CuratorFramework;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class BaragonZkMetaDatastore extends AbstractDataStore {
   private static final Logger LOG = LoggerFactory.getLogger(BaragonZkMetaDatastore.class);
 

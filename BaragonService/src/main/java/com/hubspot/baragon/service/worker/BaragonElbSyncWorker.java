@@ -1,8 +1,8 @@
 package com.hubspot.baragon.service.worker;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.inject.Named;
 import com.hubspot.baragon.BaragonDataModule;
 import com.hubspot.baragon.service.exceptions.BaragonExceptionNotifier;
 import com.hubspot.baragon.service.managers.ElbManager;
@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class BaragonElbSyncWorker implements Runnable {
   private static final Logger LOG = LoggerFactory.getLogger(BaragonElbSyncWorker.class);

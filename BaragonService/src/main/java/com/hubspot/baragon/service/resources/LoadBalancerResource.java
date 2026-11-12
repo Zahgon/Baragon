@@ -1,8 +1,19 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.auth.NoAuth;
 import com.hubspot.baragon.data.BaragonAliasDatastore;
 import com.hubspot.baragon.data.BaragonKnownAgentsDatastore;
@@ -21,19 +32,9 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
-@Path("/load-balancer")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(consumes = "application/json", value = "/load-balancer", produces = "application/json")
 public class LoadBalancerResource {
   private final BaragonLoadBalancerDatastore loadBalancerDatastore;
   private final BaragonKnownAgentsDatastore knownAgentsDatastore;
@@ -56,7 +57,7 @@ public class LoadBalancerResource {
     this.aliasDatastore = aliasDatastore;
   }
 
-  @GET
+  @GetMapping
   @NoAuth
   public Collection<String> getClusters() {
     Set<String> allValidGroups = new HashSet<>();
@@ -65,28 +66,25 @@ public class LoadBalancerResource {
     return allValidGroups;
   }
 
-  @GET
+  @GetMapping(value = "/all")
   @NoAuth
-  @Path("/all")
   public Collection<BaragonGroup> getAllClusterDetails() {
     return loadBalancerDatastore.getLoadBalancerGroups();
   }
 
-  @GET
+  @GetMapping(value = "/{clusterName}")
   @NoAuth
-  @Path("/{clusterName}")
   public Optional<BaragonGroup> getGroupDetail(
-    @PathParam("clusterName") String clusterName
+    @PathVariable("clusterName") String clusterName
   ) {
     return loadBalancerDatastore.getLoadBalancerGroup(clusterName);
   }
 
-  @POST
-  @Path("/{clusterName}/sources")
+  @PostMapping(value = "/{clusterName}/sources")
   @Deprecated
   public BaragonGroup addSource(
-    @PathParam("clusterName") String clusterName,
-    @QueryParam("source") String source
+    @PathVariable("clusterName") String clusterName,
+    @RequestParam(name = "source", required = false) String source
   ) {
     TrafficSource trafficSource = new TrafficSource(
       source,
@@ -96,12 +94,11 @@ public class LoadBalancerResource {
     return loadBalancerDatastore.addSourceToGroup(clusterName, trafficSource);
   }
 
-  @DELETE
-  @Path("/{clusterName}/sources")
+  @DeleteMapping(value = "/{clusterName}/sources")
   @Deprecated
   public Optional<BaragonGroup> removeSource(
-    @PathParam("clusterName") String clusterName,
-    @QueryParam("source") String source
+    @PathVariable("clusterName") String clusterName,
+    @RequestParam(name = "source", required = false) String source
   ) {
     return loadBalancerDatastore.removeSourceFromGroup(
       clusterName,
@@ -109,47 +106,42 @@ public class LoadBalancerResource {
     );
   }
 
-  @POST
-  @Path("/{clusterName}/traffic-source")
+  @PostMapping(value = "/{clusterName}/traffic-source")
   public BaragonGroup addTrafficSource(
-    @PathParam("clusterName") String clusterName,
-    @NotNull @Valid TrafficSource trafficSource
+    @PathVariable("clusterName") String clusterName,
+    @RequestBody @NotNull @Valid TrafficSource trafficSource
   ) {
     return loadBalancerDatastore.addSourceToGroup(clusterName, trafficSource);
   }
 
-  @DELETE
-  @Path("/{clusterName}/traffic-source")
+  @DeleteMapping(value = "/{clusterName}/traffic-source")
   public Optional<BaragonGroup> removeTrafficSource(
-    @PathParam("clusterName") String clusterName,
-    @NotNull @Valid TrafficSource trafficSource
+    @PathVariable("clusterName") String clusterName,
+    @RequestBody @NotNull @Valid TrafficSource trafficSource
   ) {
     return loadBalancerDatastore.removeSourceFromGroup(clusterName, trafficSource);
   }
 
-  @POST
-  @Path("/{clusterName}/count")
+  @PostMapping(value = "/{clusterName}/count")
   public Integer setTargetCount(
-    @PathParam("clusterName") String clusterName,
-    @QueryParam("count") int count
+    @PathVariable("clusterName") String clusterName,
+    @RequestParam(name = "count", required = false, defaultValue = "0") int count
   ) {
     return loadBalancerDatastore.setTargetCount(clusterName, count);
   }
 
-  @GET
+  @GetMapping(value = "/{clusterName}/count")
   @NoAuth
-  @Path("/{clusterName}/count")
-  public Integer getTargetCount(@PathParam("clusterName") String clusterName) {
+  public Integer getTargetCount(@PathVariable("clusterName") String clusterName) {
     return loadBalancerDatastore
       .getTargetCount(clusterName)
       .or(configuration.getDefaultTargetAgentCount());
   }
 
-  @GET
+  @GetMapping(value = "/{clusterName}/hosts")
   @NoAuth
-  @Path("/{clusterName}/hosts")
   @Deprecated
-  public Collection<String> getHosts(@PathParam("clusterName") String clusterName) {
+  public Collection<String> getHosts(@PathVariable("clusterName") String clusterName) {
     final Collection<BaragonAgentMetadata> agentMetadatas = loadBalancerDatastore.getAgentMetadata(
       clusterName
     );
@@ -164,46 +156,41 @@ public class LoadBalancerResource {
     return baseUris;
   }
 
-  @GET
+  @GetMapping(value = "/{clusterName}/agents")
   @NoAuth
-  @Path("/{clusterName}/agents")
   public Collection<BaragonAgentMetadata> getAgentMetadata(
-    @PathParam("clusterName") String clusterName
+    @PathVariable("clusterName") String clusterName
   ) {
     return loadBalancerDatastore.getAgentMetadata(clusterName);
   }
 
-  @GET
+  @GetMapping(value = "/{clusterName}/known-agents")
   @NoAuth
-  @Path("/{clusterName}/known-agents")
   public Collection<BaragonKnownAgentMetadata> getKnownAgentsMetadata(
-    @PathParam("clusterName") String clusterName
+    @PathVariable("clusterName") String clusterName
   ) {
     return knownAgentsDatastore.getKnownAgentsMetadata(clusterName);
   }
 
-  @DELETE
-  @Path("/{clusterName}/known-agents/{agentId}")
+  @DeleteMapping(value = "/{clusterName}/known-agents/{agentId}")
   public void deleteKnownAgent(
-    @PathParam("clusterName") String clusterName,
-    @PathParam("agentId") String agentId
+    @PathVariable("clusterName") String clusterName,
+    @PathVariable("agentId") String agentId
   ) {
     knownAgentsDatastore.removeKnownAgent(clusterName, agentId);
   }
 
-  @GET
+  @GetMapping(value = "/{clusterName}/base-path/all")
   @NoAuth
-  @Path("/{clusterName}/base-path/all")
-  public Collection<String> getBasePaths(@PathParam("clusterName") String clusterName) {
+  public Collection<String> getBasePaths(@PathVariable("clusterName") String clusterName) {
     return loadBalancerDatastore.getBasePaths(clusterName);
   }
 
-  @GET
+  @GetMapping(value = "/{clusterName}/base-path")
   @NoAuth
-  @Path("/{clusterName}/base-path")
   public Optional<BaragonService> getBasePathServiceId(
-    @PathParam("clusterName") String clusterName,
-    @QueryParam("basePath") String basePath
+    @PathVariable("clusterName") String clusterName,
+    @RequestParam(name = "basePath", required = false) String basePath
   ) {
     final Optional<String> maybeServiceId = loadBalancerDatastore.getBasePathServiceId(
       clusterName,
@@ -217,11 +204,10 @@ public class LoadBalancerResource {
     return stateDatastore.getService(maybeServiceId.get());
   }
 
-  @DELETE
-  @Path("/{clusterName}/base-path")
+  @DeleteMapping(value = "/{clusterName}/base-path")
   public void clearBasePath(
-    @PathParam("clusterName") String clusterName,
-    @QueryParam("basePath") String basePath
+    @PathVariable("clusterName") String clusterName,
+    @RequestParam(name = "basePath", required = false) String basePath
   ) {
     loadBalancerDatastore.clearBasePath(clusterName, basePath);
   }

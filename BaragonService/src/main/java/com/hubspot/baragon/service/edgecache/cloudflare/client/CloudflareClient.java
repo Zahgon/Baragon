@@ -8,10 +8,10 @@ import com.google.common.base.Suppliers;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.inject.Named;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.EdgeCacheConfiguration;
 import com.hubspot.baragon.service.edgecache.cloudflare.client.models.CloudflareDnsRecord;
 import com.hubspot.baragon.service.edgecache.cloudflare.client.models.CloudflareListDnsRecordsResponse;
@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class CloudflareClient {
   private static final Logger LOG = LoggerFactory.getLogger(CloudflareClient.class);
@@ -60,7 +61,7 @@ public class CloudflareClient {
   @Inject
   public CloudflareClient(
     EdgeCacheConfiguration edgeCacheConfiguration,
-    @Named(BaragonServiceModule.BARAGON_SERVICE_HTTP_CLIENT) AsyncHttpClient httpClient,
+    @Named(BaragonServiceConfiguration.BARAGON_SERVICE_HTTP_CLIENT) AsyncHttpClient httpClient,
     ObjectMapper objectMapper
   ) {
     this.httpClient = httpClient;

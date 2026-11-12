@@ -3,9 +3,8 @@ package com.hubspot.baragon.service.views;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.hubspot.baragon.service.config.BaragonConfiguration;
-import io.dropwizard.views.View;
 
-public class IndexView extends View {
+public class IndexView {
   private final String appRoot;
   private final String staticRoot;
   private final String apiRoot;
@@ -13,12 +12,14 @@ public class IndexView extends View {
   private final boolean authEnabled;
   private final boolean elbEnabled;
 
+  /** The name of the template this page is rendered from. */
+  public static final String TEMPLATE = "index";
+
   public IndexView(
     String baragonUriBase,
     String appRoot,
     BaragonConfiguration configuration
   ) {
-    super("index.mustache");
     checkNotNull(baragonUriBase, "baragonUriBase is null");
 
     String rawAppRoot = String.format("%s%s", baragonUriBase, appRoot);

@@ -1,8 +1,9 @@
 package com.hubspot.baragon.service.exceptions;
 
+import javax.inject.Named;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.service.config.SentryConfiguration;
 import java.util.Map;
 import javax.inject.Singleton;
@@ -14,6 +15,7 @@ import net.kencochrane.raven.event.interfaces.ExceptionInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class BaragonExceptionNotifier {
   private static final Logger LOG = LoggerFactory.getLogger(

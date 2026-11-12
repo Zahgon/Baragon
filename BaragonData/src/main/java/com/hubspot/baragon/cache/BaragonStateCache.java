@@ -1,10 +1,12 @@
 package com.hubspot.baragon.cache;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.inject.Named;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import com.hubspot.baragon.data.BaragonStateDatastore;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Named
 @Singleton
 public class BaragonStateCache {
   private final BaragonStateDatastore stateDatastore;

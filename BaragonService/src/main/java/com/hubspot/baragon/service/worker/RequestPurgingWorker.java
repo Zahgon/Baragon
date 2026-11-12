@@ -1,8 +1,9 @@
 package com.hubspot.baragon.service.worker;
 
+import javax.inject.Named;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.data.BaragonAgentResponseDatastore;
 import com.hubspot.baragon.data.BaragonRequestDatastore;
 import com.hubspot.baragon.data.BaragonResponseHistoryDatastore;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class RequestPurgingWorker implements Runnable {
   private static final Logger LOG = LoggerFactory.getLogger(RequestPurgingWorker.class);
 

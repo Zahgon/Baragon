@@ -1,5 +1,16 @@
 package com.hubspot.baragon.service.resources;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.hubspot.baragon.service.platform.http.MediaType;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
@@ -15,26 +26,18 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerRequest;
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerResult;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.auth.NoAuth;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.ElbConfiguration;
 import com.hubspot.baragon.service.exceptions.BaragonNotFoundException;
 import com.hubspot.baragon.service.exceptions.BaragonWebException;
 import java.util.Arrays;
 import java.util.List;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
-@Path("/elbs")
-@Produces(MediaType.APPLICATION_JSON)
+@RestController
+@RequestMapping(value = "/elbs", produces = "application/json")
 public class ElbResource {
   private final AmazonElasticLoadBalancing elbClient;
   private final Optional<ElbConfiguration> config;
@@ -42,7 +45,7 @@ public class ElbResource {
   @Inject
   public ElbResource(
     @Named(
-      BaragonServiceModule.BARAGON_AWS_ELB_CLIENT_V1
+      BaragonServiceConfiguration.BARAGON_AWS_ELB_CLIENT_V1
     ) AmazonElasticLoadBalancing elbClient,
     Optional<ElbConfiguration> config
   ) {
@@ -50,7 +53,7 @@ public class ElbResource {
     this.config = config;
   }
 
-  @GET
+  @GetMapping
   @NoAuth
   public List<LoadBalancerDescription> getAllElbs() {
     if (config.isPresent()) {
@@ -62,10 +65,9 @@ public class ElbResource {
     }
   }
 
-  @GET
+  @GetMapping(value = "/{elbName}")
   @NoAuth
-  @Path("/{elbName}")
-  public LoadBalancerDescription getElb(@PathParam("elbName") String elbName) {
+  public LoadBalancerDescription getElb(@PathVariable("elbName") String elbName) {
     if (config.isPresent()) {
       try {
         DescribeLoadBalancersRequest request = new DescribeLoadBalancersRequest(
@@ -90,10 +92,9 @@ public class ElbResource {
     }
   }
 
-  @GET
+  @GetMapping(value = "/{elbName}/instances")
   @NoAuth
-  @Path("/{elbName}/instances")
-  public List<InstanceState> getInstancesByElb(@PathParam("elbName") String elbName) {
+  public List<InstanceState> getInstancesByElb(@PathVariable("elbName") String elbName) {
     if (config.isPresent()) {
       try {
         DescribeInstanceHealthRequest request = new DescribeInstanceHealthRequest(
@@ -111,11 +112,10 @@ public class ElbResource {
     }
   }
 
-  @POST
-  @Path("/{elbName}/update")
+  @PostMapping(value = "/{elbName}/update")
   public RegisterInstancesWithLoadBalancerResult addToElb(
-    @PathParam("elbName") String elbName,
-    @QueryParam("instanceId") String instanceId
+    @PathVariable("elbName") String elbName,
+    @RequestParam(name = "instanceId", required = false) String instanceId
   ) {
     if (config.isPresent()) {
       RegisterInstancesWithLoadBalancerRequest request = new RegisterInstancesWithLoadBalancerRequest(
@@ -130,11 +130,10 @@ public class ElbResource {
     }
   }
 
-  @DELETE
-  @Path("/{elbName}/update")
+  @DeleteMapping(value = "/{elbName}/update")
   public DeregisterInstancesFromLoadBalancerResult removeFromElb(
-    @PathParam("elbName") String elbName,
-    @QueryParam("instanceId") String instanceId
+    @PathVariable("elbName") String elbName,
+    @RequestParam(name = "instanceId", required = false) String instanceId
   ) {
     if (config.isPresent()) {
       DeregisterInstancesFromLoadBalancerRequest request = new DeregisterInstancesFromLoadBalancerRequest(

@@ -13,9 +13,9 @@ import com.hubspot.baragon.models.BaragonService;
 import com.hubspot.baragon.models.BaragonServiceBuilder;
 import com.hubspot.baragon.models.RequestAction;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
+import com.hubspot.baragon.service.config.ConfigurationObjectMapper;
 import com.hubspot.baragon.service.config.MergingConfigProvider;
-import io.dropwizard.configuration.ConfigurationSourceProvider;
-import io.dropwizard.jackson.Jackson;
+import com.hubspot.baragon.service.platform.ConfigurationSourceProvider;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +25,7 @@ import org.junit.jupiter.api.Test;
 class PurgeCacheManagerTest {
   private static final YAMLFactory YAML_FACTORY = new YAMLFactory();
 
-  private ObjectMapper objectMapper = Jackson
-    .newObjectMapper()
+  private ObjectMapper objectMapper = ConfigurationObjectMapper.newObjectMapper()
     .setSerializationInclusion(Include.NON_NULL)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 

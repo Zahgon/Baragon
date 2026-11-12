@@ -1,7 +1,8 @@
 package com.hubspot.baragon.service.managers;
 
+import javax.inject.Named;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.models.BaragonRequest;
 import com.hubspot.baragon.models.BaragonService;
 import com.hubspot.baragon.models.RequestAction;
@@ -9,6 +10,7 @@ import com.hubspot.baragon.service.config.BaragonConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class PurgeCacheManager {
   private static final Logger LOG = LoggerFactory.getLogger(PurgeCacheManager.class);
 

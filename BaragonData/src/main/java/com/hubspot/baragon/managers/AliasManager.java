@@ -1,7 +1,8 @@
 package com.hubspot.baragon.managers;
 
+import javax.inject.Named;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.data.BaragonAliasDatastore;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.models.BaragonGroup;
@@ -12,6 +13,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 public class AliasManager {
   private static final Logger LOG = LoggerFactory.getLogger(AliasManager.class);
 

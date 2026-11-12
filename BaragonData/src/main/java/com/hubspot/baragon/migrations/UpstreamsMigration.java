@@ -1,14 +1,16 @@
 package com.hubspot.baragon.migrations;
 
+import javax.inject.Named;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.data.BaragonStateDatastore;
 import com.hubspot.baragon.models.UpstreamInfo;
 import java.util.Collection;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.utils.ZKPaths;
 
+@Named
 public class UpstreamsMigration extends ZkDataMigration {
   private final BaragonStateDatastore baragonStateDatastore;
   private final CuratorFramework curatorFramework;

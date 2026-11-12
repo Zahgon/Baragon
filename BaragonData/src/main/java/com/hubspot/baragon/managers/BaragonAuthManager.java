@@ -1,14 +1,15 @@
 package com.hubspot.baragon.managers;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.inject.Named;
 import com.hubspot.baragon.BaragonDataModule;
 import com.hubspot.baragon.models.BaragonAuthKey;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Named
 @Singleton
 public class BaragonAuthManager {
   private final AtomicReference<Map<String, BaragonAuthKey>> authKeys;

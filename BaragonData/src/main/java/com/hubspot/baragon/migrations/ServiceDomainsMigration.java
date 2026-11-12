@@ -1,12 +1,14 @@
 package com.hubspot.baragon.migrations;
 
+import javax.inject.Named;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.data.BaragonStateDatastore;
 import com.hubspot.baragon.models.BaragonService;
 import java.util.Set;
 
+@Named
 public class ServiceDomainsMigration extends ZkDataMigration {
   private final BaragonStateDatastore baragonStateDatastore;
   private final BaragonLoadBalancerDatastore loadBalancerDatastore;

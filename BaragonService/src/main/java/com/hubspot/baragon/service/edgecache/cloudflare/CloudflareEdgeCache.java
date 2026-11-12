@@ -1,6 +1,7 @@
 package com.hubspot.baragon.service.edgecache.cloudflare;
 
-import com.google.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Inject;
 import com.hubspot.baragon.models.BaragonRequest;
 import com.hubspot.baragon.service.config.EdgeCacheConfiguration;
 import com.hubspot.baragon.service.edgecache.EdgeCache;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
  *     cacheTagFormat: cache-tag-for-%-service
  * ...
  */
+@Named
 public class CloudflareEdgeCache implements EdgeCache {
   private static final Logger LOG = LoggerFactory.getLogger(CloudflareEdgeCache.class);
 

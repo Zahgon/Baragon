@@ -1,14 +1,13 @@
 package com.hubspot.baragon.service;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.models.BaragonAgentMetadata;
 import com.hubspot.baragon.models.BaragonRequestBuilder;
 import com.hubspot.baragon.models.BaragonService;
 import com.hubspot.baragon.models.UpstreamInfo;
 import com.hubspot.baragon.service.managers.TestAgentManager;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +30,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 public class BaragonServiceTestBase {
   private List<LeaderLatch> activeLeaderLatch = new ArrayList<>();
 
+  protected org.springframework.context.annotation.AnnotationConfigApplicationContext context;
+
   @Inject
   protected BaragonLoadBalancerDatastore loadBalancerDatastore;
 
@@ -39,8 +40,8 @@ public class BaragonServiceTestBase {
 
   @BeforeAll
   public void setup() throws Exception {
-    JerseyGuiceUtils.reset();
-    new BaragonServiceTestModule().getInjector().injectMembers(this);
+    context = new BaragonServiceTestModule().getContext();
+    context.getAutowireCapableBeanFactory().autowireBean(this);
   }
 
   @AfterEach

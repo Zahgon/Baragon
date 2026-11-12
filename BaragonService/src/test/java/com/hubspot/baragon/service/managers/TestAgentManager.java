@@ -2,15 +2,15 @@ package com.hubspot.baragon.service.managers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 import com.hubspot.baragon.BaragonDataModule;
 import com.hubspot.baragon.data.BaragonAgentResponseDatastore;
 import com.hubspot.baragon.data.BaragonLoadBalancerDatastore;
 import com.hubspot.baragon.data.BaragonStateDatastore;
 import com.hubspot.baragon.models.AgentRequestType;
 import com.hubspot.baragon.models.BaragonRequestBatchItem;
-import com.hubspot.baragon.service.BaragonServiceModule;
+import com.hubspot.baragon.service.BaragonServiceConfiguration;
 import com.hubspot.baragon.service.config.BaragonConfiguration;
 import com.ning.http.client.AsyncHttpClient;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ public class TestAgentManager extends AgentManager {
     BaragonConfiguration configuration,
     ObjectMapper objectMapper,
     @Named(
-      BaragonServiceModule.BARAGON_SERVICE_HTTP_CLIENT
+      BaragonServiceConfiguration.BARAGON_SERVICE_HTTP_CLIENT
     ) AsyncHttpClient asyncHttpClient,
     @Named(
       BaragonDataModule.BARAGON_AGENT_REQUEST_URI_FORMAT

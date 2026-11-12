@@ -1,7 +1,8 @@
 package com.hubspot.baragon.utils;
 
+import javax.inject.Named;
 import com.google.common.base.Function;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.apache.curator.utils.ZKPaths;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.KeeperException;
 
+@Named
 public class ZkParallelFetcher {
   private static final Logger LOG = Logger.getLogger(ZkParallelFetcher.class);
   private static final int TIMEOUT_SECONDS = 10;

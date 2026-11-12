@@ -1,18 +1,19 @@
 package com.hubspot.baragon.service.managed;
 
-import com.google.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Inject;
 import com.hubspot.baragon.service.exceptions.BaragonExceptionNotifier;
-import com.hubspot.baragon.service.exceptions.NotifyingExceptionMapper;
 import com.hubspot.baragon.service.exceptions.NotifyingUncaughtExceptionManager;
-import io.dropwizard.lifecycle.Managed;
+import com.hubspot.baragon.service.platform.Managed;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Named
 @Singleton
 public class BaragonExceptionNotifierManaged implements Managed {
   private static final Logger LOG = LoggerFactory.getLogger(
-    NotifyingExceptionMapper.class
+    BaragonExceptionNotifierManaged.class
   );
 
   private final BaragonExceptionNotifier exceptionNotifier;
